@@ -434,7 +434,7 @@ CloseButton.Parent = TitleBar
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 6 * sizeScale)
 CloseCorner.Parent = CloseButton
-CloseButton.MouseButton1Click:Connect(function()
+CloseButton.Activated:Connect(function()
     saveSettings()
     ScreenGui.Enabled = false
     StarterGui:SetCore("SendNotification", {
@@ -560,6 +560,23 @@ local function createSlider(parent, pos, name, min, max, default, settings, key,
             updateReachBox(box, settings)
         end
     end)
+    -- Add touch support for direct tap on track
+    Track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            local relativeX = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
+            local value = min + relativeX * (max - min)
+            if key == "transparency" then
+                value = math.round(value * 100) / 100
+            else
+                value = math.round(value)
+            end
+            Fill.Size = UDim2.new(relativeX, 0, 1, 0)
+            Knob.Position = UDim2.new(relativeX, -8 * sizeScale, 0, -5 * sizeScale)
+            Label.Text = name .. ": " .. value
+            settings[key] = value
+            updateReachBox(box, settings)
+        end
+    end)
     return SliderFrame
 end
 
@@ -576,7 +593,7 @@ ToggleButton.Parent = DribbleTab
 local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
 ToggleCorner.Parent = ToggleButton
-ToggleButton.MouseButton1Click:Connect(function()
+ToggleButton.Activated:Connect(function()
     DribbleSettings.isEnabled = not DribbleSettings.isEnabled
     ToggleButton.Text = DribbleSettings.isEnabled and "Enabled" or "Disabled"
     ToggleButton.TextColor3 = DribbleSettings.isEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
@@ -602,7 +619,7 @@ VisToggle.Parent = DribbleTab
 local VisCorner = Instance.new("UICorner")
 VisCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
 VisCorner.Parent = VisToggle
-VisToggle.MouseButton1Click:Connect(function()
+VisToggle.Activated:Connect(function()
     DribbleSettings.visible = not DribbleSettings.visible
     VisToggle.Text = "Box Visible: " .. (DribbleSettings.visible and "On" or "Off")
     VisToggle.TextColor3 = DribbleSettings.visible and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
