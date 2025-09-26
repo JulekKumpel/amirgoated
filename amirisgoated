@@ -369,7 +369,7 @@ ToggleGui.Parent = PlayerGui
 
 local ToggleButtonFrame = Instance.new("Frame")
 ToggleButtonFrame.Size = UDim2.new(0, 50 * sizeScale, 0, 50 * sizeScale)
-ToggleButtonFrame.Position = UDim2.new(0, 10, 0, 10)
+ToggleButtonFrame.Position = UDim2.new(0.5, -25 * sizeScale, 0.5, -25 * sizeScale)
 ToggleButtonFrame.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
 ToggleButtonFrame.BackgroundTransparency = 0.5
 ToggleButtonFrame.Parent = ToggleGui
