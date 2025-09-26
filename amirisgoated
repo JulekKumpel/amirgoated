@@ -355,11 +355,64 @@ end
 -- Wait for loading screen to finish before creating main UI
 wait(4) -- Wait for loading animation to complete
 
--- Create ScreenGui
+-- Create ScreenGui for main UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ReachBoxUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
+
+-- Create Toggle Button UI
+local ToggleGui = Instance.new("ScreenGui")
+ToggleGui.Name = "ToggleButtonUI"
+ToggleGui.ResetOnSpawn = false
+ToggleGui.Parent = PlayerGui
+
+local ToggleButtonFrame = Instance.new("Frame")
+ToggleButtonFrame.Size = UDim2.new(0, 50 * sizeScale, 0, 50 * sizeScale)
+ToggleButtonFrame.Position = UDim2.new(0, 10, 0, 10)
+ToggleButtonFrame.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
+ToggleButtonFrame.BackgroundTransparency = 0.5
+ToggleButtonFrame.Parent = ToggleGui
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
+ToggleCorner.Parent = ToggleButtonFrame
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(200, 150, 255)
+ToggleStroke.Thickness = 2 * sizeScale
+ToggleStroke.Parent = ToggleButtonFrame
+
+-- Toggle Button Interaction
+ToggleButtonFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        ScreenGui.Enabled = not ScreenGui.Enabled
+        ToggleButtonFrame.Visible = not ScreenGui.Enabled
+    end
+end)
+
+-- Toggle Button Dragging
+local toggleDragging = false
+local toggleDragStart = nil
+local toggleStartPos = nil
+ToggleButtonFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleDragging = true
+        toggleDragStart = input.Position
+        toggleStartPos = ToggleButtonFrame.Position
+        local conn
+        conn = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                toggleDragging = false
+                conn:Disconnect()
+            end
+        end)
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if toggleDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - toggleDragStart
+        ToggleButtonFrame.Position = UDim2.new(toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X, toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y)
+    end
+end)
 
 -- Main Frame
 local Frame = Instance.new("Frame")
@@ -437,21 +490,15 @@ CloseCorner.Parent = CloseButton
 CloseButton.Activated:Connect(function()
     saveSettings()
     ScreenGui.Enabled = false
+    ToggleButtonFrame.Visible = true
     StarterGui:SetCore("SendNotification", {
         Title = "ReachBoxUI Closed",
-        Text = "Press 'K' to reopen the ReachBox UI.",
+        Text = "Click the purple box to reopen the ReachBox UI.",
         Duration = 5
     })
 end)
 
--- Keybind to reopen GUI
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.K then
-        ScreenGui.Enabled = true
-    end
-end)
-
--- Dragging functionality
+-- Dragging functionality for main UI
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -652,7 +699,7 @@ updateReachBox(DribbleBox, DribbleSettings)
 wait(1)
 StarterGui:SetCore("SendNotification", {
     Title = "wiercipieta Reach Loaded",
-    Text = "Best way to win! Press 'K' to toggle UI.",
+    Text = "Best way to win! Click the purple box to toggle UI.",
     Duration = 5,
     Icon = "rbxassetid://0"
 })
