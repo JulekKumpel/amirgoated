@@ -8,202 +8,34 @@ local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 
+-- Load Rayfield Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Create Window
+local Window = Rayfield:CreateWindow({
+   Name = "wiercipieta Reach",
+   Icon = "target", -- Lucide target icon
+   LoadingTitle = "wiercipieta Reach System",
+   LoadingSubtitle = "BEST WAY TO WIN",
+   Theme = "Default",
+   ToggleUIKeybind = "K",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "wiercipieta",
+      FileName = "ReachSettings"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
+   },
+   KeySystem = false,
+})
+
 -- LocalPlayer and Character
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- Detect if user is on mobile
-local isMobile = UserInputService.TouchEnabled
-local sizeScale = isMobile and 0.5 or 1 -- 2x smaller for mobile
-
--- Create cool loading GUI first
-local LoadingScreenGui = Instance.new("ScreenGui")
-LoadingScreenGui.Name = "LoadingScreen"
-LoadingScreenGui.ResetOnSpawn = false
-LoadingScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-LoadingScreenGui.Parent = PlayerGui
-
--- Background with gradient
-local LoadingBackground = Instance.new("Frame")
-LoadingBackground.Size = UDim2.new(1, 0, 1, 0)
-LoadingBackground.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-LoadingBackground.BorderSizePixel = 0
-LoadingBackground.Parent = LoadingScreenGui
-
-local BackgroundGradient = Instance.new("UIGradient")
-BackgroundGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 30)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 15, 40)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 30))
-})
-BackgroundGradient.Rotation = 45
-BackgroundGradient.Parent = LoadingBackground
-
--- Animated particles
-local ParticleContainer = Instance.new("Frame")
-ParticleContainer.Size = UDim2.new(1, 0, 1, 0)
-ParticleContainer.BackgroundTransparency = 1
-ParticleContainer.Parent = LoadingBackground
-
-local function createParticle()
-    local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, math.random(4, 12) * sizeScale, 0, math.random(4, 12) * sizeScale)
-    particle.Position = UDim2.new(0, math.random(-100, 2000), 0, math.random(-100, 1200))
-    particle.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
-    particle.BorderSizePixel = 0
-    particle.BackgroundTransparency = 0.7
-    particle.Parent = ParticleContainer
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = particle
-    
-    -- Animate particle
-    local tween = TweenService:Create(particle, TweenInfo.new(math.random(3, 8), Enum.EasingStyle.Quad), {
-        Position = UDim2.new(0, math.random(-100, 2000), 0, math.random(-100, 1200)),
-        BackgroundTransparency = 1
-    })
-    tween:Play()
-    tween.Completed:Connect(function()
-        particle:Destroy()
-    end)
-end
-
--- Create particles continuously
-for i = 1, 20 do
-    spawn(function()
-        while LoadingScreenGui.Parent do
-            createParticle()
-            wait(math.random(0.2, 1))
-        end
-    end)
-end
-
--- Main loading container
-local LoadingContainer = Instance.new("Frame")
-LoadingContainer.Size = UDim2.new(0, 400 * sizeScale, 0, 300 * sizeScale)
-LoadingContainer.Position = UDim2.new(0.5, -200 * sizeScale, 0.5, -150 * sizeScale)
-LoadingContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
-LoadingContainer.BackgroundTransparency = 0.1
-LoadingContainer.Parent = LoadingBackground
-
-local ContainerCorner = Instance.new("UICorner")
-ContainerCorner.CornerRadius = UDim.new(0, 20 * sizeScale)
-ContainerCorner.Parent = LoadingContainer
-
-local ContainerStroke = Instance.new("UIStroke")
-ContainerStroke.Color = Color3.fromRGB(100, 50, 255)
-ContainerStroke.Thickness = 2 * sizeScale
-ContainerStroke.Parent = LoadingContainer
-
--- Wiercipieta title with glow effect
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 80 * sizeScale)
-TitleLabel.Position = UDim2.new(0, 0, 0, 20 * sizeScale)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "wiercipieta"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 36 * sizeScale
-TitleLabel.Font = Enum.Font.GothamBlack
-TitleLabel.TextStrokeTransparency = 0.8
-TitleLabel.TextStrokeColor3 = Color3.fromRGB(100, 50, 255)
-TitleLabel.Parent = LoadingContainer
-
--- Add glow effect to title
-local function createGlowEffect(label)
-    local glow = Instance.new("TextLabel")
-    glow.Size = UDim2.new(1, 0, 1, 0)
-    glow.Position = UDim2.new(0, 10 * sizeScale, 0, 0)
-    glow.BackgroundTransparency = 1
-    glow.Text = label.Text
-    glow.TextColor3 = Color3.fromRGB(100, 50, 255)
-    glow.TextSize = label.TextSize
-    glow.Font = label.Font
-    glow.TextTransparency = 0.7
-    glow.ZIndex = label.ZIndex - 1
-    glow.Parent = label.Parent
-    
-    -- Animate glow
-    while glow.Parent do
-        for i = 0.7, 0.3, -0.05 do
-            glow.TextTransparency = i
-            wait(0.1)
-        end
-        for i = 0.3, 0.7, 0.05 do
-            glow.TextTransparency = i
-            wait(0.1)
-        end
-    end
-end
-
-spawn(function() createGlowEffect(TitleLabel) end)
-
--- Subtitle
-local SubtitleLabel = Instance.new("TextLabel")
-SubtitleLabel.Size = UDim2.new(1, 0, 0, 40 * sizeScale)
-SubtitleLabel.Position = UDim2.new(0, 0, 0, 80 * sizeScale)
-SubtitleLabel.BackgroundTransparency = 1
-SubtitleLabel.Text = "BEST WAY TO WIN"
-SubtitleLabel.TextColor3 = Color3.fromRGB(200, 150, 255)
-SubtitleLabel.TextSize = 18 * sizeScale
-SubtitleLabel.Font = Enum.Font.GothamBold
-SubtitleLabel.Parent = LoadingContainer
-
--- Loading bar
-local LoadingBarBackground = Instance.new("Frame")
-LoadingBarBackground.Size = UDim2.new(0.8, 0, 0, 20 * sizeScale)
-LoadingBarBackground.Position = UDim2.new(0.1, 0, 0, 150 * sizeScale)
-LoadingBarBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-LoadingBarBackground.Parent = LoadingContainer
-
-local BarCorner = Instance.new("UICorner")
-BarCorner.CornerRadius = UDim.new(0, 10 * sizeScale)
-BarCorner.Parent = LoadingBarBackground
-
-local LoadingBar = Instance.new("Frame")
-LoadingBar.Size = UDim2.new(0, 0, 1, 0)
-LoadingBar.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
-LoadingBar.Parent = LoadingBarBackground
-
-local LoadingBarCorner = Instance.new("UICorner")
-LoadingBarCorner.CornerRadius = UDim.new(0, 10 * sizeScale)
-LoadingBarCorner.Parent = LoadingBar
-
--- Loading text
-local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(1, 0, 0, 30 * sizeScale)
-LoadingText.Position = UDim2.new(0, 0, 0, 180 * sizeScale)
-LoadingText.BackgroundTransparency = 1
-LoadingText.Text = "Loading Reach System..."
-LoadingText.TextColor3 = Color3.fromRGB(200, 200, 255)
-LoadingText.TextSize = 14 * sizeScale
-LoadingText.Font = Enum.Font.Gotham
-LoadingText.Parent = LoadingContainer
-
--- Animate loading bar
-spawn(function()
-    local steps = 10
-    for i = 1, steps do
-        LoadingBar.Size = UDim2.new(i/steps, 0, 1, 0)
-        LoadingText.Text = "Loading Reach System... " .. math.floor((i/steps)*100) .. "%"
-        wait(0.3)
-    end
-    
-    -- Final completion
-    wait(0.5)
-    LoadingText.Text = "Ready! Reach system activated."
-    
-    -- Fade out loading screen
-    local fadeTween = TweenService:Create(LoadingBackground, TweenInfo.new(1.5, Enum.EasingStyle.Quad), {
-        BackgroundTransparency = 1
-    })
-    fadeTween:Play()
-    
-    wait(1.5)
-    LoadingScreenGui:Destroy()
-end)
 
 -- Ball detection
 local BallsFolder = Workspace:FindFirstChild("Balls", true)
@@ -239,10 +71,21 @@ local function createReachBox(name, color)
     end)
     return box
 end
-local DribbleBox = createReachBox("DribbleBox", Color3.fromRGB(255, 0, 0)) -- Red for Dribble
 
--- Control variables for dribble mode only
-local DribbleSettings = { isEnabled = true, reachX = 10, reachY = 10, reachZ = 10, offsetX = 0, offsetY = 0, offsetZ = 0, transparency = 0.9, visible = true }
+local DribbleBox = createReachBox("DribbleBox", Color3.fromRGB(255, 0, 0))
+
+-- Control variables
+local DribbleSettings = { 
+    isEnabled = true, 
+    reachX = 10, 
+    reachY = 10, 
+    reachZ = 10, 
+    offsetX = 0, 
+    offsetY = 0, 
+    offsetZ = 0, 
+    transparency = 0.9, 
+    visible = true 
+}
 
 -- Save and load settings
 local function saveSettings()
@@ -251,16 +94,15 @@ local function saveSettings()
     }
     local json = HttpService:JSONEncode(data)
     if writefile then
-        writefile("reach_settings.json", json)
+        writefile("wiercipieta_reach_settings.json", json)
     end
 end
 
 local function loadSettings()
-    if isfile and isfile("reach_settings.json") and readfile then
-        local json = readfile("reach_settings.json")
+    if isfile and isfile("wiercipieta_reach_settings.json") and readfile then
+        local json = readfile("wiercipieta_reach_settings.json")
         local data = HttpService:JSONDecode(json)
         DribbleSettings = data.Dribble or DribbleSettings
-        -- Ensure all required fields have defaults
         DribbleSettings.offsetX = DribbleSettings.offsetX or 0
     end
 end
@@ -352,354 +194,224 @@ if DribbleSettings.isEnabled then
     startHeartbeat()
 end
 
--- Wait for loading screen to finish before creating main UI
-wait(4) -- Wait for loading animation to complete
+-- Create Main Tab
+local MainTab = Window:CreateTab("Reach Settings", "target")
 
--- Create ScreenGui for main UI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ReachBoxUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+-- Create Section for Dribble Settings
+local DribbleSection = MainTab:CreateSection("Dribble Reach Settings")
 
--- Create Toggle Button UI
-local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "ToggleButtonUI"
-ToggleGui.ResetOnSpawn = false
-ToggleGui.Parent = PlayerGui
-
-local ToggleButtonFrame = Instance.new("Frame")
-ToggleButtonFrame.Size = UDim2.new(0, 50 * sizeScale, 0, 50 * sizeScale)
-ToggleButtonFrame.Position = UDim2.new(0.5, -25 * sizeScale, 0.5, -25 * sizeScale)
-ToggleButtonFrame.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
-ToggleButtonFrame.BackgroundTransparency = 0.5
-ToggleButtonFrame.Parent = ToggleGui
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
-ToggleCorner.Parent = ToggleButtonFrame
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(200, 150, 255)
-ToggleStroke.Thickness = 2 * sizeScale
-ToggleStroke.Parent = ToggleButtonFrame
-
--- Toggle Button Interaction
-ToggleButtonFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        ScreenGui.Enabled = not ScreenGui.Enabled
-        ToggleButtonFrame.Visible = not ScreenGui.Enabled
-    end
-end)
-
--- Toggle Button Dragging
-local toggleDragging = false
-local toggleDragStart = nil
-local toggleStartPos = nil
-ToggleButtonFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        toggleDragging = true
-        toggleDragStart = input.Position
-        toggleStartPos = ToggleButtonFrame.Position
-        local conn
-        conn = input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                toggleDragging = false
-                conn:Disconnect()
+-- Enable/Disable Toggle
+local EnableToggle = MainTab:CreateToggle({
+    Name = "Enable Dribble Reach",
+    CurrentValue = DribbleSettings.isEnabled,
+    Flag = "EnableDribble",
+    Callback = function(Value)
+        DribbleSettings.isEnabled = Value
+        if Value then
+            startHeartbeat()
+        else
+            if heartbeatConnection then
+                heartbeatConnection:Disconnect()
             end
-        end)
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if toggleDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - toggleDragStart
-        ToggleButtonFrame.Position = UDim2.new(toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X, toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Main Frame
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300 * sizeScale, 0, 520 * sizeScale)
-Frame.Position = UDim2.new(0.5, -150 * sizeScale, 0.5, -260 * sizeScale)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12 * sizeScale)
-UICorner.Parent = Frame
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 50)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 20))
+        end
+        saveSettings()
+    end,
 })
-UIGradient.Rotation = 45
-UIGradient.Parent = Frame
 
--- Title Bar with wiercipieta branding
-local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 40 * sizeScale)
-TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = Frame
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 12 * sizeScale)
-TitleCorner.Parent = TitleBar
+-- Visibility Toggle
+local VisibilityToggle = MainTab:CreateToggle({
+    Name = "Box Visible",
+    CurrentValue = DribbleSettings.visible,
+    Flag = "BoxVisible",
+    Callback = function(Value)
+        DribbleSettings.visible = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Add glow effect to title bar
-local TitleGlow = Instance.new("Frame")
-TitleGlow.Size = UDim2.new(1, 0, 1, 0)
-TitleGlow.BackgroundColor3 = Color3.fromRGB(100, 50, 255)
-TitleGlow.BackgroundTransparency = 0.9
-TitleGlow.BorderSizePixel = 0
-TitleGlow.ZIndex = -1
-TitleGlow.Parent = TitleBar
+-- Reach Size Sliders
+local ReachXSlider = MainTab:CreateSlider({
+    Name = "Reach X Size",
+    Range = {0, 25},
+    Increment = 1,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.reachX,
+    Flag = "ReachX",
+    Callback = function(Value)
+        DribbleSettings.reachX = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -50 * sizeScale, 1, 0)
-TitleLabel.Position = UDim2.new(0, 10 * sizeScale, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "wiercipieta Reach"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 18 * sizeScale
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = TitleBar
+local ReachYSlider = MainTab:CreateSlider({
+    Name = "Reach Y Size",
+    Range = {0, 25},
+    Increment = 1,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.reachY,
+    Flag = "ReachY",
+    Callback = function(Value)
+        DribbleSettings.reachY = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Add subtitle
-local SubTitleLabel = Instance.new("TextLabel")
-SubTitleLabel.Size = UDim2.new(1, -50 * sizeScale, 0, 15 * sizeScale)
-SubTitleLabel.Position = UDim2.new(0, 10 * sizeScale, 0, 25 * sizeScale)
-SubTitleLabel.BackgroundTransparency = 1
-SubTitleLabel.Text = "BEST WAY TO WIN"
-SubTitleLabel.TextColor3 = Color3.fromRGB(200, 150, 255)
-SubTitleLabel.TextSize = 10 * sizeScale
-SubTitleLabel.Font = Enum.Font.GothamBold
-SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-SubTitleLabel.Parent = TitleBar
+local ReachZSlider = MainTab:CreateSlider({
+    Name = "Reach Z Size",
+    Range = {0, 25},
+    Increment = 1,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.reachZ,
+    Flag = "ReachZ",
+    Callback = function(Value)
+        DribbleSettings.reachZ = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Close Button
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30 * sizeScale, 0, 30 * sizeScale)
-CloseButton.Position = UDim2.new(1, -35 * sizeScale, 0, 5 * sizeScale)
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 16 * sizeScale
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.Parent = TitleBar
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6 * sizeScale)
-CloseCorner.Parent = CloseButton
-CloseButton.Activated:Connect(function()
-    saveSettings()
-    ScreenGui.Enabled = false
-    ToggleButtonFrame.Visible = true
-    StarterGui:SetCore("SendNotification", {
-        Title = "ReachBoxUI Closed",
-        Text = "Click the purple box to reopen the ReachBox UI.",
-        Duration = 5
-    })
-end)
+-- Offset Sliders
+local OffsetXSlider = MainTab:CreateSlider({
+    Name = "Offset X",
+    Range = {-10, 10},
+    Increment = 0.5,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.offsetX,
+    Flag = "OffsetX",
+    Callback = function(Value)
+        DribbleSettings.offsetX = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Dragging functionality for main UI
-local dragging = false
-local dragStart = nil
-local startPos = nil
-TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Frame.Position
-        local conn
-        conn = input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-                conn:Disconnect()
-            end
-        end)
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+local OffsetYSlider = MainTab:CreateSlider({
+    Name = "Offset Y",
+    Range = {-10, 10},
+    Increment = 0.5,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.offsetY,
+    Flag = "OffsetY",
+    Callback = function(Value)
+        DribbleSettings.offsetY = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Tab Content Frame (only Dribble tab now)
-local DribbleTab = Instance.new("Frame")
-DribbleTab.Size = UDim2.new(1, 0, 1, -40 * sizeScale)
-DribbleTab.Position = UDim2.new(0, 0, 0, 40 * sizeScale)
-DribbleTab.BackgroundTransparency = 1
-DribbleTab.Parent = Frame
+local OffsetZSlider = MainTab:CreateSlider({
+    Name = "Offset Z",
+    Range = {-10, 10},
+    Increment = 0.5,
+    Suffix = "studs",
+    CurrentValue = DribbleSettings.offsetZ,
+    Flag = "OffsetZ",
+    Callback = function(Value)
+        DribbleSettings.offsetZ = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Hover effect function
-local function addHoverEffect(button)
-    local originalColor = button.BackgroundColor3
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalColor:Lerp(Color3.fromRGB(255, 255, 255), 0.1)}):Play()
-    end)
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalColor}):Play()
-    end)
-end
+-- Transparency Slider
+local TransparencySlider = MainTab:CreateSlider({
+    Name = "Box Transparency",
+    Range = {0, 1},
+    Increment = 0.1,
+    Suffix = "",
+    CurrentValue = DribbleSettings.transparency,
+    Flag = "Transparency",
+    Callback = function(Value)
+        DribbleSettings.transparency = Value
+        updateReachBox(DribbleBox, DribbleSettings)
+        saveSettings()
+    end,
+})
 
--- Function to create a slider
-local function createSlider(parent, pos, name, min, max, default, settings, key, box)
-    local SliderFrame = Instance.new("Frame")
-    SliderFrame.Size = UDim2.new(0.9, 0, 0, 50 * sizeScale)
-    SliderFrame.Position = pos
-    SliderFrame.BackgroundTransparency = 1
-    SliderFrame.Parent = parent
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, 0, 0, 20 * sizeScale)
-    Label.BackgroundTransparency = 1
-    Label.Text = name .. ": " .. (default or 0)
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 14 * sizeScale
-    Label.Font = Enum.Font.Gotham
-    Label.Parent = SliderFrame
-    local Track = Instance.new("Frame")
-    Track.Size = UDim2.new(1, 0, 0, 6 * sizeScale)
-    Track.Position = UDim2.new(0, 0, 0, 25 * sizeScale)
-    Track.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Track.Parent = SliderFrame
-    local TrackCorner = Instance.new("UICorner")
-    TrackCorner.CornerRadius = UDim.new(0, 3 * sizeScale)
-    TrackCorner.Parent = Track
-    local Fill = Instance.new("Frame")
-    Fill.Size = UDim2.new((default or min) / (max - min), 0, 1, 0)
-    Fill.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
-    Fill.Parent = Track
-    local FillCorner = Instance.new("UICorner")
-    FillCorner.CornerRadius = UDim.new(0, 3 * sizeScale)
-    FillCorner.Parent = Fill
-    local Knob = Instance.new("Frame")
-    Knob.Size = UDim2.new(0, 16 * sizeScale, 0, 16 * sizeScale)
-    Knob.Position = UDim2.new((default or min) / (max - min), -8 * sizeScale, 0, -5 * sizeScale)
-    Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Knob.Parent = Track
-    local KnobCorner = Instance.new("UICorner")
-    KnobCorner.CornerRadius = UDim.new(0.5, 0)
-    KnobCorner.Parent = Knob
-    local dragging = false
-    Knob.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
+-- Create Info Tab
+local InfoTab = Window:CreateTab("Information", "info")
+
+-- Info Section
+local InfoSection = InfoTab:CreateSection("About wiercipieta Reach")
+
+-- Info Paragraph
+local InfoParagraph = InfoTab:CreateParagraph({
+    Title = "wiercipieta Reach System",
+    Content = "BEST WAY TO WIN\n\nThis script provides enhanced reach capabilities for ball games. The reach box will automatically interact with nearby balls when enabled."
+})
+
+-- Instructions Section
+local InstructionsSection = InfoTab:CreateSection("Instructions")
+
+local InstructionsParagraph = InfoTab:CreateParagraph({
+    Title = "How to Use",
+    Content = "1. Enable the reach system using the toggle\n2. Adjust the reach size to your preference\n3. Set offsets to position the box correctly\n4. Toggle visibility to see/hide the reach box\n5. Press K to hide/show the interface"
+})
+
+-- Credits Section
+local CreditsSection = InfoTab:CreateTab("Credits", "heart")
+
+local CreditsParagraph = CreditsTab:CreateParagraph({
+    Title = "Credits",
+    Content = "wiercipieta Reach System\n\nBuilt with Rayfield UI Library\nBEST WAY TO WIN"
+})
+
+-- Create a button to reset settings
+local ResetButton = MainTab:CreateButton({
+    Name = "Reset to Default Settings",
+    Callback = function()
+        DribbleSettings = {
+            isEnabled = true,
+            reachX = 10,
+            reachY = 10,
+            reachZ = 10,
+            offsetX = 0,
+            offsetY = 0,
+            offsetZ = 0,
+            transparency = 0.9,
+            visible = true
+        }
+        
+        -- Update all UI elements
+        EnableToggle:Set(DribbleSettings.isEnabled)
+        VisibilityToggle:Set(DribbleSettings.visible)
+        ReachXSlider:Set(DribbleSettings.reachX)
+        ReachYSlider:Set(DribbleSettings.reachY)
+        ReachZSlider:Set(DribbleSettings.reachZ)
+        OffsetXSlider:Set(DribbleSettings.offsetX)
+        OffsetYSlider:Set(DribbleSettings.offsetY)
+        OffsetZSlider:Set(DribbleSettings.offsetZ)
+        TransparencySlider:Set(DribbleSettings.transparency)
+        
+        updateReachBox(DribbleBox, DribbleSettings)
+        if DribbleSettings.isEnabled then
+            startHeartbeat()
         end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-            saveSettings()
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local relativeX = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
-            local value = min + relativeX * (max - min)
-            if key == "transparency" then
-                value = math.round(value * 100) / 100
-            else
-                value = math.round(value)
-            end
-            Fill.Size = UDim2.new(relativeX, 0, 1, 0)
-            Knob.Position = UDim2.new(relativeX, -8 * sizeScale, 0, -5 * sizeScale)
-            Label.Text = name .. ": " .. value
-            settings[key] = value
-            updateReachBox(box, settings)
-        end
-    end)
-    -- Add touch support for direct tap on track
-    Track.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            local relativeX = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
-            local value = min + relativeX * (max - min)
-            if key == "transparency" then
-                value = math.round(value * 100) / 100
-            else
-                value = math.round(value)
-            end
-            Fill.Size = UDim2.new(relativeX, 0, 1, 0)
-            Knob.Position = UDim2.new(relativeX, -8 * sizeScale, 0, -5 * sizeScale)
-            Label.Text = name .. ": " .. value
-            settings[key] = value
-            updateReachBox(box, settings)
-        end
-    end)
-    return SliderFrame
-end
+        saveSettings()
+        
+        Rayfield:Notify({
+            Title = "Settings Reset",
+            Content = "All settings have been reset to default values.",
+            Duration = 3,
+            Image = "check-circle",
+        })
+    end,
+})
 
--- Create controls for dribble tab
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0.9, 0, 0, 40 * sizeScale)
-ToggleButton.Position = UDim2.new(0.05, 0, 0, 10 * sizeScale)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleButton.Text = DribbleSettings.isEnabled and "Enabled" or "Disabled"
-ToggleButton.TextColor3 = DribbleSettings.isEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-ToggleButton.TextSize = 16 * sizeScale
-ToggleButton.Font = Enum.Font.GothamSemibold
-ToggleButton.Parent = DribbleTab
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
-ToggleCorner.Parent = ToggleButton
-ToggleButton.Activated:Connect(function()
-    DribbleSettings.isEnabled = not DribbleSettings.isEnabled
-    ToggleButton.Text = DribbleSettings.isEnabled and "Enabled" or "Disabled"
-    ToggleButton.TextColor3 = DribbleSettings.isEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    if DribbleSettings.isEnabled then
-        startHeartbeat()
-    else
-        if heartbeatConnection then
-            heartbeatConnection:Disconnect()
-        end
-    end
-    saveSettings()
-end)
-
-local VisToggle = Instance.new("TextButton")
-VisToggle.Size = UDim2.new(0.9, 0, 0, 40 * sizeScale)
-VisToggle.Position = UDim2.new(0.05, 0, 0, 410 * sizeScale)
-VisToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-VisToggle.Text = "Box Visible: " .. (DribbleSettings.visible and "On" or "Off")
-VisToggle.TextColor3 = DribbleSettings.visible and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-VisToggle.TextSize = 16 * sizeScale
-VisToggle.Font = Enum.Font.GothamSemibold
-VisToggle.Parent = DribbleTab
-local VisCorner = Instance.new("UICorner")
-VisCorner.CornerRadius = UDim.new(0, 8 * sizeScale)
-VisCorner.Parent = VisToggle
-VisToggle.Activated:Connect(function()
-    DribbleSettings.visible = not DribbleSettings.visible
-    VisToggle.Text = "Box Visible: " .. (DribbleSettings.visible and "On" or "Off")
-    VisToggle.TextColor3 = DribbleSettings.visible and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    updateReachBox(DribbleBox, DribbleSettings)
-    saveSettings()
-end)
-
--- Create sliders
-local sliders = {}
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 60 * sizeScale), "Reach X", 0, 25, DribbleSettings.reachX or 10, DribbleSettings, "reachX", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 110 * sizeScale), "Reach Y", 0, 25, DribbleSettings.reachY or 10, DribbleSettings, "reachY", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 160 * sizeScale), "Reach Z", 0, 25, DribbleSettings.reachZ or 10, DribbleSettings, "reachZ", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 210 * sizeScale), "Offset X", -10, 10, DribbleSettings.offsetX or 0, DribbleSettings, "offsetX", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 260 * sizeScale), "Offset Y", -10, 10, DribbleSettings.offsetY or 0, DribbleSettings, "offsetY", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 310 * sizeScale), "Offset Z", -10, 10, DribbleSettings.offsetZ or 0, DribbleSettings, "offsetZ", DribbleBox)
-sliders[#sliders + 1] = createSlider(DribbleTab, UDim2.new(0.05, 0, 0, 360 * sizeScale), "Transparency", 0, 1, DribbleSettings.transparency or 0.9, DribbleSettings, "transparency", DribbleBox)
-
--- Add hover effects
-addHoverEffect(CloseButton)
-addHoverEffect(ToggleButton)
-addHoverEffect(VisToggle)
-
--- Start heartbeat
-startHeartbeat()
-
--- Initialize box
-updateReachBox(DribbleBox, DribbleSettings)
-
--- Final notification
+-- Send notification when loaded
 wait(1)
-StarterGui:SetCore("SendNotification", {
+Rayfield:Notify({
     Title = "wiercipieta Reach Loaded",
-    Text = "Best way to win! Click the purple box to toggle UI.",
+    Content = "Best way to win! Press K to toggle UI.",
     Duration = 5,
-    Icon = "rbxassetid://0"
+    Image = "target",
 })
+
+-- Final initialization
+updateReachBox(DribbleBox, DribbleSettings)
+if DribbleSettings.isEnabled then
+    startHeartbeat()
+end
